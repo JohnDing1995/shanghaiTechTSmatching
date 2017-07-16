@@ -1,13 +1,16 @@
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,  login, logout
-from .forms import RegisterForm, LoginForm, EditForm
-from .models import Students
 from django.http import HttpResponse
-from django.views.generic.edit import UpdateView
-from fetch_teacher.fetch_teacher_infomation import TeacherInformationSpider
+
+from .model.fetch_teacher_infomation import TeacherInformationSpider
+
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from .model.fetch_teacher_infomation import TeacherInformationSpider
+from .model.forms import RegisterForm, LoginForm, EditForm
+from .model.models import Students
+
 
 # Create your views here.
 def stu_login(request):
@@ -32,9 +35,6 @@ def stu_login(request):
 
     form = LoginForm()
     return render(request, 'students/stu_login.html', {'form': form})
-
-
-
 
 def stu_register(request):
     if request.method == 'POST':
@@ -63,7 +63,7 @@ def main_page(request):
 @login_required
 def stu_edit(request):
     form = EditForm()
-    if(request.method == 'POST'):
+    if request.method == 'POST':
         form = EditForm(request.POST)
         if form.is_valid():
             stu = Students.objects.get(user_name=request.user.username)
@@ -84,9 +84,18 @@ def stu_edit(request):
     return render(request, 'students/stu_edit.html', {'form':form})
 
 @login_required
-def select_teacher(requests):
+def select_teacher(request):
     t_spider = TeacherInformationSpider()
-    t_info = t_spider.spider()
+    t_spider.spider()
+    t_spider.process_data()
+    t_info = t_spider.return_data()
+    if request.method == "POST":
+        selection1 = request.POST.get('t1')
+        selection2 = request.POST.get('t2')
+        selection3 = request.POST.get('t3')
+        print(selection1)
 
-    return render(requests, 'students/teacher_selection.html', {'info':t_info})
+        return render(request, 'students/teacher_selection.html', {'info': t_info})
+    return render(request, 'students/teacher_selection.html', {'info':t_info})
+
 
