@@ -48,7 +48,7 @@
                                         <dt><h3>GPA:</h3></dt>
                                         <dd><h3><small>{{ student.GPA }}</small></h3></dd>
                                         <dt><h3>Tel:</h3></dt>
-                                        <dd><h3><small>{{ student.tel }}</small></h3></dd>
+                                        <dd><h3><small>{{ student.phone_number }}</small></h3></dd>
                                         <dt><h3>We Chat:</h3></dt>
                                         <dd><h3><small>{{ student.we_chat }}</small></h3></dd>
                                     </dl>
@@ -64,10 +64,12 @@
                                 <div class="row">
                                     <br>
                                     <div class="col-md-9">
-                                        <a href="#" class="btn btn-lg btn-success" role="button">
+                                        <a href="{% url 'tea_mess_page' 'accept' student.name %}" target="_self"
+                                           class="btn btn-lg btn-success" role="button">
                                             Accept
                                         </a>
-                                        <a href="#" class="btn btn-lg btn-danger" role="button">
+                                        <a href="{% url 'tea_mess_page' 'reject' student.name %}" target="_self"
+                                           class="btn btn-lg btn-danger" role="button">
                                             Reject
                                         </a>
                                         <a href="#" class="btn btn-lg btn-info" role="button">
@@ -102,7 +104,7 @@
                                         <dt><h3>GPA:</h3></dt>
                                         <dd><h3><small>{{ student.GPA }}</small></h3></dd>
                                         <dt><h3>Tel:</h3></dt>
-                                        <dd><h3><small>{{ student.tel }}</small></h3></dd>
+                                        <dd><h3><small>{{ student.phone_number }}</small></h3></dd>
                                         <dt><h3>We Chat:</h3></dt>
                                         <dd><h3><small>{{ student.we_chat }}</small></h3></dd>
                                     </dl>
@@ -118,10 +120,12 @@
                                 <div class="row">
                                     <br>
                                     <div class="col-md-9">
-                                        <a href="#" class="btn btn-lg btn-success" role="button">
+                                        <a href="{% url 'tea_mess_page' 'accept' student.name %}" target="_self"
+                                           class="btn btn-lg btn-success" role="button">
                                             Accept
                                         </a>
-                                        <a href="#" class="btn btn-lg btn-danger" role="button">
+                                        <a href="{% url 'tea_mess_page' 'reject' student.name %}" target="_self"
+                                           class="btn btn-lg btn-danger" role="button">
                                             Reject
                                         </a>
                                         <a href="#" class="btn btn-lg btn-info" role="button">
