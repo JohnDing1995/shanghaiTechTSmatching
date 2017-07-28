@@ -5,11 +5,11 @@ class LoginForm(forms.Form):
                                 max_length='50',
                                 required=True, strip=True,
                                 widget=forms.TextInput(attrs={
-                                    'class': 'form-control',
+                                    'class': 'form-control input-box',
                                     'placeholder': 'Enter your name'
                                 }))
     user_pwd = forms.CharField(label='Password:', widget=forms.PasswordInput(attrs={
-        'class': 'form-control',
+        'class': 'form-control input-box',
         'placeholder': 'Enter your password'
     }))
 
@@ -51,7 +51,7 @@ class EditForm(forms.Form):
     stu_name = forms.CharField(label='姓名:', max_length='20', required=True, strip=True,
     widget = forms.TextInput(attrs={
         'class': 'form-control',
-        'placeholder': '输入姓名'
+        'placeholder': '输入姓名',
     })
     )
     stu_id = forms.CharField(label='身份证号：'
