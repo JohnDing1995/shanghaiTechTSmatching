@@ -9,6 +9,10 @@ from .model.models import Students, Teachers, Selection
 from .model.utility import Captcha, FileUploadHdl
 import io
 
+def login_logger(func):
+    def wrapper(*args, **kw):
+        print('student %s')
+        return func(*args, **kw)
 
 # Log student in.
 def stu_login(request):
