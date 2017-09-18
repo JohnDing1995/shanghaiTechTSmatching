@@ -63,7 +63,12 @@ def main_page(request):
     #Students.objects.get_or_create(user_name=request.user.username)
     stu_profile = Students.objects.get(user_name=request.user.username)
     name = stu_profile.name
-    stu_status = "被录取" if stu_profile.accepted else "尚未录取"
+    accepted_teacher = stu_profile.accepted
+    if accepted_teacher:
+        teacher_name = Teachers.objects.get(id=accepted_teacher).user_name
+        stu_status = "被 " + teacher_name + " 教授录取"
+    else:
+        "尚未录取"
     return render(request, 'students/main_page.html',{'name':name,
                                                       'stu':stu_profile,
                                                       'admission_status':stu_status})
