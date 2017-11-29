@@ -1,16 +1,19 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.auth import update_session_auth_hash
-from django.db.models import QuerySet
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 from .model.forms import RegisterForm, LoginForm, EditForm, PasswordChangeForm
 from .model.models import Students, Teachers, Selection
-from .model.utility import Captcha
-from django.views.generic.edit import UpdateView
+from .model.utility import Captcha, FileUploadHdl
 import io
+
+def login_logger(func):
+    def wrapper(*args, **kw):
+        print('student %s')
+        return func(*args, **kw)
+
 # Log student in.
 def stu_login(request):
     if request.method == 'POST':
@@ -60,7 +63,15 @@ def main_page(request):
     #Students.objects.get_or_create(user_name=request.user.username)
     stu_profile = Students.objects.get(user_name=request.user.username)
     name = stu_profile.name
-    return render(request, 'students/main_page.html',{'name':name, 'stu':stu_profile})
+    accepted_teacher = stu_profile.accepted
+    if accepted_teacher:
+        teacher_name = Teachers.objects.get(id=accepted_teacher).user_name
+        stu_status = "被 " + teacher_name + " 教授录取"
+    else:
+        "尚未录取"
+    return render(request, 'students/main_page.html',{'name':name,
+                                                      'stu':stu_profile,
+                                                      'admission_status':stu_status})
 
 @login_required(login_url='/student/login/', redirect_field_name = None)
 def stu_edit(request):
@@ -86,9 +97,8 @@ def stu_edit(request):
         form.encoding = 'utf-8'
         print(form.is_valid())
         if form.is_valid():
-
+            uploader = FileUploadHdl(form.cleaned_data['stu_pic'],  form.cleaned_data['stu_attachment'],stu)
             stu.resident_id = form.cleaned_data['stu_id']
-            print(form.cleaned_data['stu_id'])
             stu.name = form.cleaned_data['stu_name']
             stu.date_of_birth = form.cleaned_data['stu_birth']
             stu.email = form.cleaned_data['stu_email']
@@ -98,11 +108,12 @@ def stu_edit(request):
             stu.gpa = form.cleaned_data['stu_gpa']
             stu.ranking = form.cleaned_data['stu_ranking']
             stu.comment = form.cleaned_data['stu_comment']
-            stu.attachment = form.cleaned_data['stu_attachment']
             stu.sex = form.cleaned_data['stu_sex']
-            stu.photo = form.cleaned_data['stu_pic']
             stu.save()
+            uploader.save()
             return render(request, 'students/stu_edit.html', {'form': form, 'info': "个人信息已修改"})
+        else:
+            return render(request, 'students/stu_edit.html', {'form': form, 'info': "格式不正确"})
     return render(request, 'students/stu_edit.html', {'form':form})
 
 @login_required(login_url='/student/login/', redirect_field_name = None)
@@ -122,14 +133,21 @@ def select_teacher(request):
         s1 = Teachers.objects.get(id=stu_selection.first_id).name
         s2 = Teachers.objects.get(id=stu_selection.second_id).name
         s3 = Teachers.objects.get(id=stu_selection.third_id).name
+        s1_status = "【Rejected】" if stu_selection.first_rejected else ""
+        s2_status = "【Rejected】" if stu_selection.second_rejected else ""
+        s3_status = "【Rejected】" if stu_selection.third_rejected else ""
     except Exception:
         s1,s2,s3 = "尚未选择", "尚未选择", "尚未选择"
+        s1_status, s2_status, s3_status = " ", " ", " "
     # the form returns selected teacher's id, and show teacher's name in main page
     if request.method == "POST":
         selection1 = int(request.POST.get('t1'))+1
         selection2 = int(request.POST.get('t2'))+1
         selection3 = int(request.POST.get('t3'))+1
         if selection1 != selection2 and selection1 !=selection3 and selection2 != selection3:
+            if Selection.objects.filter(student_id=request.user.username).count() == 0:
+                Selection.objects.create(student_id=request.user.username)
+            stu_selection = Selection.objects.get(student_id=request.user.username)
             stu_selection.first_id = selection1
             stu_selection.second_id = selection2
             stu_selection.third_id = selection3
@@ -144,6 +162,9 @@ def select_teacher(request):
                                                                'first_teacher':s1,
                                                                'second_teacher': s2,
                                                                'third_teacher': s3,
+                                                               'first_status': s1_status,
+                                                               'second_status': s2_status,
+                                                               'third_status': s3_status,
                                                                'error':err
                                                                })
 

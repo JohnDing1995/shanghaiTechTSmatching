@@ -2,32 +2,23 @@ from PIL import ImageDraw, ImageFont, ImageFilter, Image
 from .models import Students, Teachers, Selection
 from .forms import TeacherChangePwdForm
 import random
-
-
+import os
+import platform
 # This class is used for checking the teacher users
 # update the data of teacher in the database
 class TeacherHandle:
-    def __init__(self, name, pwd=''):
-        try:
-            result = Teachers.objects.get(user_name=name)
-            if not result:
-                self.__can_login = False
-            else:
-                self.__name = result.user_name
-                self.__password = result.password
-                self.__id = result.id
-                self.__can_login = self.__password == pwd
-                self.__password_form = TeacherChangePwdForm()
-                # self.__can_change_password = False
-        except Teachers.DoesNotExist:
+    def __init__(self, name):
+        result = Teachers.objects.get(user_name=name)
+        if not result:
             self.__can_login = False
+        else:
+            self.__name = result.user_name
+            self.__id = result.id
+            self.__password = result.password
+            self.__password_form = TeacherChangePwdForm()
 
     def __str__(self):
         return self.__name
-
-    # check the pwd of a teacher
-    def can_login(self):
-        return self.__can_login
 
     # Switch the status of can_change_password
     # This method will try to change the user's password and
@@ -208,7 +199,10 @@ class Captcha:
         return (random.randint(32, 127), random.randint(32, 127), random.randint(32, 127))
 
     def captcha_generation(self):
-        font = ImageFont.truetype('Arial.ttf', 36)
+        if platform.system() is "Windows":
+            font = ImageFont.truetype('C:\\Windows\\Fonts\\Arial.ttf', 36)
+        else:
+            font = ImageFont.truetype('Arial.ttf', 36)
         draw = ImageDraw.Draw(self.image)
         for x in range(self.__width):
             for y in range(self.__height):
@@ -225,3 +219,33 @@ class NullDefault:
     def cleaned_data_not_null(self, label, current_form):
         if current_form.cleaned_data[label] is None:
             pass
+
+#This class is for updating the uploaded file in sever.
+# When new file uploaded, delete previous file and replace
+# it with new file
+class FileUploadHdl:
+    def __init__(self, img, attachment, db):
+        self.img = img
+        self.attachment = attachment
+        self.db = db
+    def __clear_original(self):
+        path = os.path.abspath('.')+'/static/'
+        if self.img is not None:
+            try:
+                os.remove(path+str(self.db.photo))
+                print('deleted photo')
+            except:
+                print('No photo will be deleted due to the first upload')
+        if self.attachment is not None:
+            try:
+                os.remove(path+str(self.db.attachment))
+                print('deleted attachment')
+            except:
+                print('No file will be deleted due to the first upload')
+    def save(self):
+        self.__clear_original()
+        if self.attachment is not None:
+            self.db.attachment = self.attachment
+        if self.img is not None:
+            self.db.photo = self.img
+        self.db.save()
