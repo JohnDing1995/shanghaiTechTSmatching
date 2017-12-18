@@ -58,10 +58,12 @@ def stu_register(request):
         form = RegisterForm()
     return render(request, 'students/stu_register.html', {'form':form,'error':''})
 #show current user's profile
+
 @login_required(login_url='/student/login/', redirect_field_name = None)
 def main_page(request):
     #Students.objects.get_or_create(user_name=request.user.username)
     stu_profile = Students.objects.get(user_name=request.user.username)
+    stu_status = " "
     name = stu_profile.name
     accepted_teacher = stu_profile.accepted
     if accepted_teacher:
