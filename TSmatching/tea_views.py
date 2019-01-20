@@ -25,7 +25,7 @@ def do_login(user, pwd):
 # Create your views here.
 def login(request):
     # Clear the session
-    request.session.clear()
+    #request.session.clear()
 
     if request.method == 'POST':
         form = LoginForm(request.POST)

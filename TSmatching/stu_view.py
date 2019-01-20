@@ -1,3 +1,4 @@
+# coding=utf-8
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -51,7 +52,7 @@ def stu_register(request):
                 stu.save()
                 return HttpResponseRedirect('./login')
             else:
-                return render(request, 'students/stu_register.html', {'form': form, 'error': '请检查验证码是否正确'})
+                return render(request, 'students/stu_register.html', {'form': form, 'error': 'Please Check '})
         else:
             return render(request, 'students/stu_register.html', {'form' : form,'error' : '请检查用户名密码是否符合要求'})
     else:
